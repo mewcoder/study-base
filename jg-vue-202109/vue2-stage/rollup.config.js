@@ -1,7 +1,7 @@
 import babel from "rollup-plugin-babel";
 import serve from "rollup-plugin-serve";
 export default {
-  input: "./src/new/index.js",
+  input: "./src/index.js",
   output: {
     format: "umd", // 模块化类型
     file: "dist/vue.js",

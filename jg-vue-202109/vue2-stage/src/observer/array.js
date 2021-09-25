@@ -1,25 +1,37 @@
-let oldArrayProtoMethods = Array.prototype;
-export let arrayMethods = Object.create(Array.prototype);
+const oldArrayPrototype = Array.prototype;
 
-let method = ["push", "shift", "unshift", "pop", "reverse", "sort", "splice"];
+export let arrayMethods = Object.create(oldArrayPrototype);
 
-method.forEach((method) => {
+const methods = [
+  "push",
+  "pop",
+  "shift",
+  "unshift",
+  "reverse",
+  "sort",
+  "splice",
+];
+
+methods.forEach((method) => {
   arrayMethods[method] = function (...args) {
-    oldArrayProtoMethods[method].call(this, ...args);
-    const ob = this.__ob__;
+    const result = oldArrayPrototype[method].apply(this, args);
+    console.log(this);
     let inserted;
+    const ob = this.__ob__;
     switch (method) {
       case "push":
       case "unshift":
-        insertd = args;
+        inserted = args; // 新增的元素
         break;
       case "splice":
-        insertd = args.slice(2);
-        break;
-
-      default:
+        inserted = args.slice(2); // 新增的元素
         break;
     }
-    if (inserted) ob.observeArray(inserted); // 对新增的每一项进行观测
+    // 这里如何劫持新增的元素？
+    if (inserted) {
+      console.log(this);
+      ob.observeArray(inserted); //获取方法
+    }
+    return result;
   };
 });

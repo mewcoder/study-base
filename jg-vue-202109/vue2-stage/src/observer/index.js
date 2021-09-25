@@ -1,61 +1,52 @@
+import { isObject } from "../utils/index";
+
 import { arrayMethods } from "./array";
-import { isObject } from "../utils";
+
+export function observe(data) {
+  if (!isObject(data)) return;
+  if (data.__ob__) {
+    //如果已经被劫持过了，就不再劫持
+    return;
+  }
+  return new Observer(data);
+}
 
 class Observer {
   constructor(data) {
-    //传递this
-    Object.defineProperties(data, "__ob__", {
+    // 给data设置一个__ob__属性，表示Observer实例
+    // 还有一个作用表示该对象是否被劫持过
+    Object.defineProperty(data, "__ob__", {
       value: this,
-      enumerable: false,
+      enumerable: false, // 不可枚举
     });
+
     if (Array.isArray(data)) {
-      // 劫持数组原型方法
-      data.__proto__ = arrayMethods;
+      data.__proto__ = arrayMethods; // 将数组的原型方法指向arrayMethods
       this.observeArray(data);
-    } else {
-      this.walk(data);
     }
+    this.walk(data);
   }
-
-  observeArray(data) {
-    data.forEach((item) => {
-      observe(item);
-    });
-  }
-
   walk(data) {
     Object.keys(data).forEach((key) => {
       defineReactive(data, key, data[key]);
     });
   }
+  observeArray(data) {
+    data.forEach((item) => observe(item));
+  }
 }
 
-function defineReactive(data, key, val) {
-  observe(val); // 递归
-  // const dep = new Dep();
+function defineReactive(data, key, value) {
+  observe(value); // 如果是对象，递归调用
   Object.defineProperty(data, key, {
-    enumerable: true,
-    configurable: true,
     get() {
-      // dep.depend();
-      return val;
+      console.log("get:" + key + ":" + value);
+      return value;
     },
-    set(newVal) {
-      observe(newVal);
-      if (newVal === val) return;
-      val = newVal;
-      // dep.notify();
+    set(newValue) {
+      if (newValue === value) return;
+      value = newValue;
+      observe(newValue); //如果赋值的是对象，劫持该对象
     },
   });
-}
-
-export function observe(data) {
-  if (!isObject(data)) {
-    return;
-  }
-
-  if (data.__ob__) {
-    return;
-  }
-  return new Observer(data);
 }
