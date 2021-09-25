@@ -1,4 +1,4 @@
-import { arrayMethods } from "../array";
+import { arrayMethods } from "./array";
 import { isObject } from "../utils";
 
 class Observer {

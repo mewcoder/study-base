@@ -1,5 +1,5 @@
 let oldArrayProtoMethods = Array.prototype;
-export let   = Object.create(Array.prototype);
+export let arrayMethods = Object.create(Array.prototype);
 
 let method = ["push", "shift", "unshift", "pop", "reverse", "sort", "splice"];
 

@@ -15,16 +15,17 @@ export function initMixin(Vue) {
     const options = vm.$options;
 
     el = document.querySelector(el);
-
+    vm.$el = el;
     if (!options.render) {
       let template = options.template;
       if (!template && el) {
         template = el.outerHTML;
-        let render = compileToFunctions(template);
+        let render = compileToFunctions(template); //把模块转换成 对应的渲染函数
         options.render = render;
       }
     }
 
-    //把模块转换成 对应的渲染函数
+    // 挂载组件
+    mountComponent(vm, el);
   };
 }

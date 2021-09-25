@@ -14,10 +14,17 @@
   <script>
     let vm = new Vue({
       el: '#app',
-      data() {
-        name: 'test'
+      data: {
+        a: 'aa',
+        b: {
+          bb: 'bb'
+        },
+        c: [1, 2]
       },
     })
+    console.log('htm:' + vm.a)
+    console.log('htm:' + vm.b.bb)
+    vm.c.push(3)
   </script>
 </body>
 
