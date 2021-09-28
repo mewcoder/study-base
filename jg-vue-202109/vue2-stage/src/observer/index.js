@@ -1,5 +1,4 @@
 import { isObject } from "../utils/index";
-
 import { arrayMethods } from "./array";
 
 export function observe(data) {
@@ -40,7 +39,6 @@ function defineReactive(data, key, value) {
   observe(value); // 如果是对象，递归调用
   Object.defineProperty(data, key, {
     get() {
-      console.log("get:" + key + ":" + value);
       return value;
     },
     set(newValue) {

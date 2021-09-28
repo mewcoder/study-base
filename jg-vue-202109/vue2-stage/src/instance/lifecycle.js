@@ -14,5 +14,5 @@ export function mountComponent(vm, el) {
     vm._update(vm._render()); // 后续更新可以调用updateComponent方法
     // 用虚拟dom 生成真实dom
   };
-  // updateComponent();
+  updateComponent();
 }

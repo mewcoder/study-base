@@ -4,196 +4,17 @@
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Vue = factory());
 })(this, (function () { 'use strict';
 
-  function _typeof(obj) {
-    "@babel/helpers - typeof";
-
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof = function (obj) {
-        return typeof obj;
-      };
-    } else {
-      _typeof = function (obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-      };
-    }
-
-    return _typeof(obj);
-  }
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  function _defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  function _createClass(Constructor, protoProps, staticProps) {
-    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) _defineProperties(Constructor, staticProps);
-    return Constructor;
-  }
-
-  function isObject(val) {
-    return val !== null && _typeof(val) === "object";
-  }
-
-  var oldArrayPrototype = Array.prototype;
-  var arrayMethods = Object.create(oldArrayPrototype);
-  var methods = ["push", "pop", "shift", "unshift", "reverse", "sort", "splice"];
-  methods.forEach(function (method) {
-    arrayMethods[method] = function () {
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      var result = oldArrayPrototype[method].apply(this, args);
-      console.log(this);
-      var inserted;
-      var ob = this.__ob__;
-
-      switch (method) {
-        case "push":
-        case "unshift":
-          inserted = args; // 新增的元素
-
-          break;
-
-        case "splice":
-          inserted = args.slice(2); // 新增的元素
-
-          break;
-      } // 这里如何劫持新增的元素？
-
-
-      if (inserted) {
-        console.log(this);
-        ob.observeArray(inserted); //获取方法
-      }
-
-      return result;
-    };
-  });
-
-  function observe(data) {
-    if (!isObject(data)) return;
-
-    if (data.__ob__) {
-      //如果已经被劫持过了，就不再劫持
-      return;
-    }
-
-    return new Observer(data);
-  }
-
-  var Observer = /*#__PURE__*/function () {
-    function Observer(data) {
-      _classCallCheck(this, Observer);
-
-      // 给data设置一个__ob__属性，表示Observer实例
-      // 还有一个作用表示该对象是否被劫持过
-      Object.defineProperty(data, "__ob__", {
-        value: this,
-        enumerable: false // 不可枚举
-
-      });
-
-      if (Array.isArray(data)) {
-        data.__proto__ = arrayMethods; // 将数组的原型方法指向arrayMethods
-
-        this.observeArray(data);
-      }
-
-      this.walk(data);
-    }
-
-    _createClass(Observer, [{
-      key: "walk",
-      value: function walk(data) {
-        Object.keys(data).forEach(function (key) {
-          defineReactive(data, key, data[key]);
-        });
-      }
-    }, {
-      key: "observeArray",
-      value: function observeArray(data) {
-        data.forEach(function (item) {
-          return observe(item);
-        });
-      }
-    }]);
-
-    return Observer;
-  }();
-
-  function defineReactive(data, key, value) {
-    observe(value); // 如果是对象，递归调用
-
-    Object.defineProperty(data, key, {
-      get: function get() {
-        console.log("get:" + key + ":" + value);
-        return value;
-      },
-      set: function set(newValue) {
-        if (newValue === value) return;
-        value = newValue;
-        observe(newValue); //如果赋值的是对象，劫持该对象
-      }
-    });
-  }
-
-  function initState(vm) {
-    var opt = vm.$options;
-
-    if (opt.data) {
-      initData(vm); //初始化data
-    }
-  }
-
-  function initData(vm) {
-    var data = vm.$options.data; // 通过_data将data挂载到vm上
-    // 如果data是函数，则执行函数，获取到data
-
-    data = vm._data = typeof data === "function" ? data.call(vm) : data; // 代理，可以通过vm.xxx访问data中的属性
-
-    for (var key in data) {
-      proxy(vm, "_data", key);
-    }
-
-    observe(data); //数据劫持
-  } // 代理函数
-
-
-  function proxy(target, source, key) {
-    Object.defineProperty(target, key, {
-      get: function get() {
-        return target[source][key];
-      },
-      set: function set(newVal) {
-        target[source][key] = newVal;
-      }
-    });
-  }
-
   var defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g; // {{aaaaa}}
   // html字符串 =》 字符串  _c('div',{id:'app',a:1},'hello')
 
   function genProps(attrs) {
     // [{name:'xxx',value:'xxx'},{name:'xxx',value:'xxx'}]
-    var str = '';
+    var str = "";
 
     for (var i = 0; i < attrs.length; i++) {
       var attr = attrs[i];
 
-      if (attr.name === 'style') {
+      if (attr.name === "style") {
         (function () {
           // color:red;background:blue
           var styleObj = {};
@@ -242,7 +63,7 @@
           tokens.push(JSON.stringify(text.slice(lastIndex)));
         }
 
-        return "_v(".concat(tokens.join('+'), ")");
+        return "_v(".concat(tokens.join("+"), ")");
       }
     }
   }
@@ -253,7 +74,7 @@
     if (children) {
       return children.map(function (c) {
         return gen(c);
-      }).join(',');
+      }).join(",");
     }
 
     return false;
@@ -263,7 +84,7 @@
     //  _c('div',{id:'app',a:1},_c('span',{},'world'),_v())
     // 遍历树 将树拼接成字符串
     var children = genChildren(el);
-    var code = "_c('".concat(el.tag, "',").concat(el.attrs.length ? genProps(el.attrs) : 'undefined').concat(children ? ",".concat(children) : '', ")");
+    var code = "_c('".concat(el.tag, "',").concat(el.attrs.length ? genProps(el.attrs) : "undefined").concat(children ? ",".concat(children) : "", ")");
     return code;
   }
 
@@ -456,56 +277,251 @@
 
   function lifecycleMixin(Vue) {
     Vue.prototype._update = function (vnode) {
+      // 既有初始化 又又更新
       var vm = this;
       patch(vm.$el, vnode);
     };
   }
   function mountComponent(vm, el) {
-    // 更新函数
+    // 更新函数 数据变化后 会再次调用此函数
     var updateComponent = function updateComponent() {
-      //调用render方法,生成虚拟dom
-      vm._update(vm._render());
+      // 调用render函数，生成虚拟dom
+      vm._update(vm._render()); // 后续更新可以调用updateComponent方法
+      // 用虚拟dom 生成真实dom
+
     };
 
     updateComponent();
   }
 
+  function _typeof(obj) {
+    "@babel/helpers - typeof";
+
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function (obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function (obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
+
+  function isFunction(val) {
+    return typeof val === "function";
+  }
+  function isObject(val) {
+    return val !== null && _typeof(val) === "object";
+  }
+
+  var oldArrayPrototype = Array.prototype;
+  var arrayMethods = Object.create(oldArrayPrototype);
+  var methods = ["push", "pop", "shift", "unshift", "reverse", "sort", "splice"];
+  methods.forEach(function (method) {
+    arrayMethods[method] = function () {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      var result = oldArrayPrototype[method].apply(this, args);
+      console.log(this);
+      var inserted;
+      var ob = this.__ob__;
+
+      switch (method) {
+        case "push":
+        case "unshift":
+          inserted = args; // 新增的元素
+
+          break;
+
+        case "splice":
+          inserted = args.slice(2); // 新增的元素
+
+          break;
+      } // 这里如何劫持新增的元素？
+
+
+      if (inserted) {
+        console.log(this);
+        ob.observeArray(inserted); //获取方法
+      }
+
+      return result;
+    };
+  });
+
+  function observe(data) {
+    if (!isObject(data)) return;
+
+    if (data.__ob__) {
+      //如果已经被劫持过了，就不再劫持
+      return;
+    }
+
+    return new Observer(data);
+  }
+
+  var Observer = /*#__PURE__*/function () {
+    function Observer(data) {
+      _classCallCheck(this, Observer);
+
+      // 给data设置一个__ob__属性，表示Observer实例
+      // 还有一个作用表示该对象是否被劫持过
+      Object.defineProperty(data, "__ob__", {
+        value: this,
+        enumerable: false // 不可枚举
+
+      });
+
+      if (Array.isArray(data)) {
+        data.__proto__ = arrayMethods; // 将数组的原型方法指向arrayMethods
+
+        this.observeArray(data);
+      }
+
+      this.walk(data);
+    }
+
+    _createClass(Observer, [{
+      key: "walk",
+      value: function walk(data) {
+        Object.keys(data).forEach(function (key) {
+          defineReactive(data, key, data[key]);
+        });
+      }
+    }, {
+      key: "observeArray",
+      value: function observeArray(data) {
+        data.forEach(function (item) {
+          return observe(item);
+        });
+      }
+    }]);
+
+    return Observer;
+  }();
+
+  function defineReactive(data, key, value) {
+    observe(value); // 如果是对象，递归调用
+
+    Object.defineProperty(data, key, {
+      get: function get() {
+        return value;
+      },
+      set: function set(newValue) {
+        if (newValue === value) return;
+        value = newValue;
+        observe(newValue); //如果赋值的是对象，劫持该对象
+      }
+    });
+  }
+
+  function initState(vm) {
+    // 状态的初始化
+    var opts = vm.$options;
+
+    if (opts.data) {
+      initData(vm);
+    } // if(opts.computed){
+    //     initComputed();
+    // }
+    // if(opts.watch){
+    //     initWatch();
+    // }
+
+  }
+
+  function proxy(vm, source, key) {
+    Object.defineProperty(vm, key, {
+      get: function get() {
+        return vm[source][key];
+      },
+      set: function set(newValue) {
+        vm[source][key] = newValue;
+      }
+    });
+  }
+
+  function initData(vm) {
+    //
+    var data = vm.$options.data; // vm.$el  vue 内部会对属性检测如果是以$开头 不会进行代理
+    // vue2中会将data中的所有数据 进行数据劫持 Object.defineProperty
+    // 这个时候 vm 和 data没有任何关系, 通过_data 进行关联
+
+    data = vm._data = isFunction(data) ? data.call(vm) : data; // 用户去vm.xxx => vm._data.xxx
+
+    for (var key in data) {
+      // vm.name = 'xxx'  vm._data.name = 'xxx'
+      proxy(vm, "_data", key);
+    }
+
+    observe(data);
+  }
+
   function initMixin(Vue) {
+    // 表示在vue的基础上做一次混合操作
     Vue.prototype._init = function (options) {
-      var vm = this;
-      vm.$options = options;
-      initState(vm); // 初始化状态
-      // 页面挂载
+      // el,data
+      var vm = this; // var that = this;
+
+      vm.$options = options; // 后面会对options进行扩展操作
+      // 对数据进行初始化 watch computed props data ...
+
+      initState(vm); // vm.$options.data  数据劫持
 
       if (vm.$options.el) {
+        // 将数据挂载到这个模板上
         vm.$mount(vm.$options.el);
       }
-    }; // 为了方便把，mount写在这里
-
+    };
 
     Vue.prototype.$mount = function (el) {
       var vm = this;
       var options = vm.$options;
       el = document.querySelector(el);
-      vm.$el = el;
+      vm.$el = el; // 把模板转化成 对应的渲染函数 =》 虚拟dom概念 vnode =》 diff算法 更新虚拟dom =》 产生真实节点，更新
 
       if (!options.render) {
+        // 没有render用template，目前没render
         var template = options.template;
 
         if (!template && el) {
-          // 如果没有模板，就把el的html作为模板
-          template = el.outerHTML; // 将template编译成render函数
-        } // 将template编译成render函数
+          // 用户也没有传递template 就取el的内容作为模板
+          template = el.outerHTML;
+          var render = compileToFunction(template);
+          options.render = render;
+        }
+      } // options.render 就是渲染函数
+      // 调用render方法 渲染成真实dom 替换掉页面的内容
 
 
-        var render = compileToFunction(template); // 这部分先忽略学习
-        // console.log(render);
-
-        options.render = render;
-      } // 挂载
-
-
-      mountComponent(vm);
+      mountComponent(vm); // 组件的挂载流程
     };
   }
 
@@ -535,36 +551,41 @@
   }
 
   function renderMixin(Vue) {
-    Vue.prototype._v = function (text) {
-      // 创建文本
-      return createTextElement(text);
+    Vue.prototype._c = function () {
+      // createElement
+      return createElement.apply(void 0, [this].concat(Array.prototype.slice.call(arguments)));
     };
 
-    Vue.prototype._c = function () {
-      // 创建元素
-      return createElement.apply(void 0, arguments);
+    Vue.prototype._v = function (text) {
+      // createTextElement
+      return createTextElement(this, text);
     };
 
     Vue.prototype._s = function (val) {
-      return val == null ? "" : _typeof(val) === "object" ? JSON.stringify(val) : val;
+      // stringify
+      if (_typeof(val) == "object") return JSON.stringify(val);
+      return val;
     };
 
     Vue.prototype._render = function () {
       var vm = this;
-      var render = vm.$options.render;
+      var render = vm.$options.render; // 就是我们解析出来的render方法，同时也有可能是用户写的
+
       var vnode = render.call(vm);
       return vnode;
     };
   }
 
   function Vue(options) {
+    //options为用户传入的选项
     this._init(options);
   }
 
   initMixin(Vue); // 给Vue添加了一个_init方法
 
-  renderMixin(Vue);
-  lifecycleMixin(Vue);
+  renderMixin(Vue); //_render方法 生成vdom
+
+  lifecycleMixin(Vue); //_update方法 转为 真实dom
 
   return Vue;
 

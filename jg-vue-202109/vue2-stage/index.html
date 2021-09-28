@@ -9,22 +9,24 @@
 </head>
 
 <body>
-  <div id='app'>{{c}}</div>
+  <div id='app'>{{a}}</div>
   <script src="./dist/vue.js"></script>
   <script>
     let vm = new Vue({
       el: '#app',
       data: {
-        a: 'aa',
+        a: 'hello+a',
         b: {
-          bb: 'bb'
+          bb: 'hello+bb'
         },
         c: [1, 2]
       },
     })
-    console.log('htm:' + vm.a)
-    console.log('htm:' + vm.b.bb)
     vm.c.push(3)
+    setTimeout(() => {
+      vm.a = 'world'
+      vm._update(vm._render())
+    }, 3000)
   </script>
 </body>
 

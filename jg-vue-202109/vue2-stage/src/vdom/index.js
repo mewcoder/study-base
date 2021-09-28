@@ -8,12 +8,12 @@ export function createTextElement(vm, text) {
 
 function vnode(vm, tag, data, key, children, text) {
   return {
-    vm,
-    tag,
-    data,
-    key,
-    children,
-    text,
-    // .....
-  };
+      vm,
+      tag,
+      data,
+      key,
+      children,
+      text,
+      // .....
+  }
 }
