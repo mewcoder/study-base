@@ -1,5 +1,6 @@
 import { isObject } from "../utils/index";
 import { arrayMethods } from "./array";
+import Dep from "./dep";
 
 export function observe(data) {
   if (!isObject(data)) return;
@@ -37,14 +38,22 @@ class Observer {
 
 function defineReactive(data, key, value) {
   observe(value); // 如果是对象，递归调用
+  let dep = new Dep(); // 每个属性都有一个dep属性
   Object.defineProperty(data, key, {
     get() {
+      if (Dep.target) {
+        dep.depend();
+      }
       return value;
     },
     set(newValue) {
       if (newValue === value) return;
+
       value = newValue;
+
       observe(newValue); //如果赋值的是对象，劫持该对象
+
+      dep.notify();
     },
   });
 }

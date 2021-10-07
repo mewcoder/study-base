@@ -6,6 +6,8 @@ export function patch(oldVnode, vnode) {
     parentElm.insertBefore(elm, oldVnode.nextSibling);
 
     parentElm.removeChild(oldVnode);
+
+    return elm;
   }
 }
 

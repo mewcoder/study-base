@@ -251,6 +251,7 @@
 
       parentElm.insertBefore(elm, oldVnode.nextSibling);
       parentElm.removeChild(oldVnode);
+      return elm;
     }
   }
 
@@ -273,25 +274,6 @@
     }
 
     return vnode.el;
-  }
-
-  function lifecycleMixin(Vue) {
-    Vue.prototype._update = function (vnode) {
-      // 既有初始化 又又更新
-      var vm = this;
-      patch(vm.$el, vnode);
-    };
-  }
-  function mountComponent(vm, el) {
-    // 更新函数 数据变化后 会再次调用此函数
-    var updateComponent = function updateComponent() {
-      // 调用render函数，生成虚拟dom
-      vm._update(vm._render()); // 后续更新可以调用updateComponent方法
-      // 用虚拟dom 生成真实dom
-
-    };
-
-    updateComponent();
   }
 
   function _typeof(obj) {
@@ -330,6 +312,121 @@
     if (protoProps) _defineProperties(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties(Constructor, staticProps);
     return Constructor;
+  }
+
+  var id$1 = 0;
+
+  var Dep = /*#__PURE__*/function () {
+    function Dep() {
+      _classCallCheck(this, Dep);
+
+      this.id = id$1++;
+      this.subs = [];
+    }
+
+    _createClass(Dep, [{
+      key: "depend",
+      value: function depend() {
+        if (Dep.target) {
+          Dep.target.addDep(this); // 让watcher,去存放dep
+        }
+      }
+    }, {
+      key: "addSub",
+      value: function addSub(sub) {
+        this.subs.push(sub);
+      }
+    }, {
+      key: "notify",
+      value: function notify() {
+        this.subs.forEach(function (sub) {
+          return sub.update();
+        });
+      }
+    }]);
+
+    return Dep;
+  }();
+
+  Dep.target = null; // 全局
+
+  function pushTarget(watcher) {
+    Dep.target = watcher;
+  }
+  function popTarget() {
+    Dep.target = null;
+  }
+
+  var id = 0;
+
+  var Watcher = /*#__PURE__*/function () {
+    // 第二个参数可能是表达式
+    function Watcher(vm, exprOrFn, cb, options) {
+      _classCallCheck(this, Watcher);
+
+      this.vm = vm;
+      this.exprOrFn = exprOrFn;
+
+      if (typeof exprOrFn === "function") {
+        this.getter = exprOrFn;
+        this.deps = [];
+        this.depsId = new Set();
+      }
+
+      this.cb = cb;
+      this.options = options;
+      this.id = id++;
+      this.get(); // 默认让 exprOrFn 执行, render执行时会进行取值
+    }
+
+    _createClass(Watcher, [{
+      key: "get",
+      value: function get() {
+        pushTarget(this);
+        this.getter();
+        popTarget();
+      }
+    }, {
+      key: "update",
+      value: function update() {
+        this.get();
+      }
+    }, {
+      key: "addDep",
+      value: function addDep(dep) {
+        var id = dep.id;
+
+        if (!this.depsId.has(id)) {
+          this.depsId.add(id);
+          this.deps.push(dep);
+          dep.addSub(this);
+        }
+      }
+    }]);
+
+    return Watcher;
+  }();
+
+  function lifecycleMixin(Vue) {
+    Vue.prototype._update = function (vnode) {
+      // 既有初始化 又又更新
+      var vm = this;
+      vm.$el = patch(vm.$el, vnode);
+    };
+  }
+  function mountComponent(vm, el) {
+    // 更新函数 数据变化后 会再次调用此函数
+    var updateComponent = function updateComponent() {
+      // 调用render函数，生成虚拟dom
+      vm._update(vm._render()); // 后续更新可以调用updateComponent方法
+      // 用虚拟dom 生成真实dom
+
+    }; // updateComponent();
+
+
+    new Watcher(vm, updateComponent, function () {
+      console.log("视图更新了");
+    }, true); // true表示为渲染watcher
   }
 
   function isFunction(val) {
@@ -430,14 +527,22 @@
   function defineReactive(data, key, value) {
     observe(value); // 如果是对象，递归调用
 
+    var dep = new Dep(); // 每个属性都有一个dep属性
+
     Object.defineProperty(data, key, {
       get: function get() {
+        if (Dep.target) {
+          dep.depend();
+        }
+
         return value;
       },
       set: function set(newValue) {
         if (newValue === value) return;
         value = newValue;
         observe(newValue); //如果赋值的是对象，劫持该对象
+
+        dep.notify();
       }
     });
   }

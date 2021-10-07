@@ -3,6 +3,7 @@ import { popTarget, pushTarget } from "./dep";
 let id = 0;
 
 class Watcher {
+  // 第二个参数可能是表达式
   constructor(vm, exprOrFn, cb, options) {
     this.vm = vm;
     this.exprOrFn = exprOrFn;
@@ -12,14 +13,18 @@ class Watcher {
       this.depsId = new Set();
     }
     this.cb = cb;
-    this.id = ++id;
     this.options = options;
-    this.get();
+    this.id = id++;
+
+    this.get(); // 默认让 exprOrFn 执行, render执行时会进行取值
   }
   get() {
     pushTarget(this);
     this.getter();
     popTarget();
+  }
+  update(){
+    this.get();
   }
   addDep(dep) {
     let id = dep.id;

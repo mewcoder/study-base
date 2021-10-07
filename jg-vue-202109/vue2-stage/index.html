@@ -13,7 +13,7 @@
   <script src="./dist/vue.js"></script>
   <script>
     let vm = new Vue({
-      el: '#app',
+      // el: '#app',
       data: {
         a: 'hello+a',
         b: {
@@ -22,6 +22,7 @@
         c: [1, 2]
       },
     })
+    vm.$mount('#app');
     vm.c.push(3)
     setTimeout(() => {
       vm.a = 'world'

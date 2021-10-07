@@ -1,10 +1,11 @@
 import { patch } from "../vdom/patch";
+import Watcher from "../observer/watcher";
 export function lifecycleMixin(Vue) {
   Vue.prototype._update = function (vnode) {
     // 既有初始化 又又更新
     const vm = this;
 
-    patch(vm.$el, vnode);
+    vm.$el = patch(vm.$el, vnode);
   };
 }
 export function mountComponent(vm, el) {
@@ -14,5 +15,16 @@ export function mountComponent(vm, el) {
     vm._update(vm._render()); // 后续更新可以调用updateComponent方法
     // 用虚拟dom 生成真实dom
   };
-  updateComponent();
+  // updateComponent();
+
+  new Watcher(
+    vm,
+    updateComponent,
+    () => {
+      console.log("视图更新了");
+    },
+    true
+  );
+
+  // true表示为渲染watcher
 }
